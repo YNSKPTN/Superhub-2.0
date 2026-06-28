@@ -1,41 +1,37 @@
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local runService = game:GetService("RunService")
+-- Modded X PLS DONATE - Fake Robux Katlama Scripti
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
--- --- ARAYÜZ (KÜÇÜLTME + ÖLÜMSÜZLÜK + İZLE + GİT) ---
--- [Önceki panel kodlarının hepsi burada, sadece God Mode butonu değişti]
-
-local godBtn = Instance.new("TextButton")
-godBtn.Text = "FAKE BODY GOD [KAPALI]"
-godBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 150) -- Mor renk (Yeni Mod)
-godBtn.Parent = mainFrame
-
-local godActive = false
-godBtn.MouseButton1Click:Connect(function()
-    godActive = not godActive
-    godBtn.Text = "FAKE BODY " .. (godActive and "[AKTİF]" or "[KAPALI]")
-    
-    if godActive then
-        -- 🛡️ KARAKTERİ KLONLAYIP ASIL GÖVDENİ SAKLAMA
-        pcall(function()
-            local char = player.Character
-            char.Archivable = true
-            local clone = char:Clone()
-            clone.Parent = workspace
-            
-            -- Gerçek karakterini çok uzağa ışınla (Görünmez yap)
-            char.HumanoidRootPart.CFrame = CFrame.new(0, 5000, 0) 
-            
-            -- Kamerayı ve kontrolü klona ver
-            workspace.CurrentCamera.CameraSubject = clone.Humanoid
-            
-            -- Oyun hasar verirse klona verir, asıl karakterin 5000 metre yukarıda güvende kalır!
-        end)
-    else
-        -- Kapatınca normal karaktere dön
-        player.Character.HumanoidRootPart.CFrame = workspace.CurrentCamera.Focus
+-- Oyundaki olası para verme fonksiyonlarını (Remote) otomatik bulmaya çalışır
+local function findRemote()
+    -- Yaygın kullanılan isimleri tarar
+    local names = {"AddRobux", "GiveRobux", "ClaimRobux", "GetRobux", "AddFakeRobux", "UpdateCash", "Reward"}
+    for _, name in ipairs(names) do
+        local found = ReplicatedStorage:FindFirstChild(name, true)
+        if found and found:IsA("RemoteEvent") then
+            return found
+        end
     end
-end)
+    return nil
+end
 
--- --- İZLEME VE GİTME (EKSİKSİZ KORUNDU) ---
--- [Tüm o LookVector izleme ve tam içine gitme kodları burada]
+local Remote = findRemote()
+
+if Remote then
+    print("Çalışan sistem bulundu! Sahte Robuxlar katlanıyor...")
+    -- Sonsuz döngü: Saniyede binlerce kez para sinyali gönderir
+    while task.wait() do
+        Remote:FireServer() -- Sunucuya sürekli 'bana para ver' sinyali yollar
+    end
+else
+    -- Eğer özel bir isim koydularsa oyunun içindeki tüm RemoteEvent'leri spamlar
+    print("Özel sistem bulunamadı, genel tarama yapılıyor...")
+    while task.wait() do
+        for _, v in pairs(ReplicatedStorage:GetDescendants()) do
+            if v:IsA("RemoteEvent") then
+                v:FireServer()
+            end
+        end
+    end
+end
